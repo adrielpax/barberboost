@@ -1,0 +1,169 @@
+Perfeito, Adriel! Agora vamos detalhar como será a jornada do cliente e do barbeiro dentro do sistema “Meu Barbeiro”, desde o momento que ele coloca o número até a automação de agendamentos, incluindo todas as páginas e funcionalidades. Vou estruturar como fluxo completo, pensando em valor percebido e experiência intuitiva.
+
+1. Jornada do Cliente (usuário do salão/barbearia)
+Passo 1: Inscrição / Pagamento
+
+Página inicial com CTA: “Cadastre-se e agilize seus agendamentos”
+
+Formulário rápido:
+
+Nome
+
+Número de WhatsApp ou celular (ponto de entrada para automação via Zapier/n8n)
+
+Email (opcional)
+
+Após envio:
+
+O sistema dispara uma automação de integração (via n8n ou Zapier) para validar o número e criar conta.
+
+Se houver pagamento, redireciona para gateway de pagamento (Stripe, Pix, cartão) integrado.
+
+Página: Signup / Payment
+
+Design limpo, CTA evidente, mensagem de valor: “Em menos de 1 minuto você agenda seu corte sem ligar para ninguém”.
+
+Passo 2: Tela de Boas-vindas / Onboarding
+
+Mostra benefícios do app:
+
+Agenda fácil
+
+Barbeiros próximos
+
+Promoções exclusivas
+
+Pergunta se quer configurar preferências de notificações.
+
+Botão “Começar a agendar” → leva à tela principal.
+
+Página: Onboarding / Welcome
+
+Passo 3: Tela Principal / Feed
+
+Lista de barbeiros próximos com filtros: distância, avaliações, serviços.
+
+Cada card de barbeiro mostra:
+
+Foto
+
+Nome e especialidade
+
+Avaliação
+
+Preço médio dos serviços
+
+Botão “Agendar agora”
+
+Página: Home / Feed
+
+Passo 4: Agendamento
+
+Quando o cliente clica em “Agendar agora”:
+
+Escolhe serviço (ex: corte, barba, combo).
+
+Escolhe dia e horário (agenda em tempo real do barbeiro).
+
+Confirma e recebe resumo do agendamento.
+
+Automação via n8n/Zapier: envia mensagem de confirmação via WhatsApp ou SMS e registra no sistema.
+
+Página: Booking / Scheduling
+
+Mostra “Seu horário está reservado” + botão para adicionar no calendário.
+
+Passo 5: Dashboard / Meus Agendamentos
+
+Lista todos os agendamentos futuros e passados.
+
+Permite cancelar ou reagendar (automação atualiza o barbeiro).
+
+Notificações automáticas:
+
+Lembretes 1 hora antes
+
+Feedback pós-serviço
+
+Página: My Appointments / Dashboard
+
+Passo 6: Pagamentos e Fidelidade
+
+Se houver serviços pagos pelo app:
+
+Página de checkout rápido
+
+Histórico de pagamentos
+
+Pontos de fidelidade / descontos aplicados automaticamente.
+
+Página: Payments / Rewards
+
+2. Jornada do Barbeiro
+Passo 1: Inscrição / Configuração
+
+Formulário com:
+
+Nome da barbearia
+
+Serviços oferecidos + preços
+
+Fotos do salão e cortes
+
+Agenda disponível
+
+Após cadastro, automação cria o perfil público e conecta agenda com app.
+
+Página: Barber Signup / Setup
+
+Passo 2: Dashboard do Barbeiro
+
+Visualização clara da agenda do dia/semana.
+
+Pedidos e agendamentos integrados:
+
+Novos agendamentos aparecem em tempo real.
+
+Notificação quando cliente cancela ou re-agenda.
+
+Estatísticas:
+
+Faturamento diário/semana/mês
+
+Serviços mais vendidos
+
+Clientes frequentes
+
+Página: Barber Dashboard
+
+Passo 3: Gerenciamento de Serviços e Produtos
+
+Adicionar/editar serviços (ex: corte, barba, combo)
+
+Preços e promoções
+
+Produtos (cremes, pomadas) para venda no app
+
+Página: Services & Products Management
+
+Passo 4: Marketing e Promoções
+
+Criar promoções relâmpago para clientes
+
+Ver clientes que não agendaram recentemente e enviar mensagem automática (via automação)
+
+Página: Marketing / Promotions
+
+3. Automação do Sistema
+
+Entrada do número do cliente → automação cria lead no banco de dados.
+
+Agendamento concluído → disparo de notificação para cliente e barbeiro.
+
+Cancelamento / reagendamento → atualização automática no calendário e notificação para ambos.
+
+Promoções ou lembretes → automação envia mensagem via WhatsApp ou push notification.
+
+Ferramentas de automação: n8n, Zapier ou integração direta via backend Node.js.
+
+Se você quiser, posso criar um diagrama visual completo do fluxo, mostrando todas as páginas, ações e automações, como se fosse um blueprint do “Meu Barbeiro” pronto para passar para o time de devs ou usar como referência de produto.
