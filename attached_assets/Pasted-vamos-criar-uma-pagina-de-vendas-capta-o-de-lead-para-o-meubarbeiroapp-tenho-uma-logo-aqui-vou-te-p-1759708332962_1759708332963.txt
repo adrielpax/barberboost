@@ -1,0 +1,128 @@
+vamos criar uma pagina de vendas captação de lead para o meubarbeiroapp tenho uma logo aqui vou te passar quero que fazamos as coisas como copywrrites profissionais sendo apelativo para o CTA  logico e emocional, quero uma rota admin para eu ver todas as paginas nenhuma pagina pode ter ligação com a outra sao landingpages paginas de rotas use REACTQUERY REACT NEXTJS TAILWINDCSS RADIXUI para o lead use popups para os textos vou pssar uma referencia abaixo e as paginas de referencia tbm
+cores branco e azul.. use emojis para ser mais legal mas tbm seja profissional a logo vou anexar:
+
+obs: nao fique preso a copy abaixo faça pagina maior do que sera use seccçao de beneficios secção de pros e contras para engajar sempre com muitas copys vou te passa a logo do app use em locais estrategicos nao so como logo , na logo quero escrito Meu Barbeiro e logo da tesoura pode ser em preto se conseguir modificar a imagem ok nao use so branco e azul abuse do preto contraste de seçoes 1,3,5,7 e as ,2,4,6,8 em outras cores para quebrar a pagina nao ser chato faça animaçoes e use muito o radix ui.
+
+✨ 1. Estrutura e Copy da Landing Page Principal — “MeuBarbeiro”
+
+Objetivo: gerar conversões diretas (cadastro e criação de link de agendamento)
+Foco: praticidade, ganho de tempo e profissionalismo imediato
+Linguagem: simples, direta e com autoridade sutil
+
+🧭 Seção 1 – Hero (acima da dobra)
+
+Título (headline):
+
+💈 “Seu agendamento no WhatsApp, sem complicação — profissional, rápido e automático.”
+
+Subtítulo (benefício direto):
+
+Crie seu link de agendamento em menos de 1 minuto e nunca mais perca um cliente por mensagem esquecida.
+
+Botão CTA:
+
+👉 Criar meu link agora (Grátis!)
+
+Visual sugerido:
+📱 mockup de um barbeiro no WhatsApp com mensagem automática: “Seu horário foi confirmado!”
+
+💡 Seção 2 – A Dor
+
+Todo barbeiro já passou por isso...
+mensagens chegando o dia todo, confusão com horários, esquecimento de clientes e até “furos” na agenda.
+
+Você trabalha duro — seu sistema precisa trabalhar por você.
+
+🚀 Seção 3 – A Solução (Proposta de Valor)
+
+Com o MeuBarbeiro, você automatiza tudo:
+
+Seus clientes agendam sozinhos pelo WhatsApp
+
+Você recebe notificações e confirmações automáticas
+
+A agenda se organiza sozinha no seu painel
+
+🎯 Em poucos cliques, você transforma sua rotina caótica em uma barbearia digital.
+
+Botão CTA:
+
+💬 Criar meu link gratuito agora
+
+💎 Seção 4 – Planos e Benefícios
+
+Escolha o plano ideal para o tamanho do seu negócio 👇
+
+Plano	Ideal Para	Benefícios-Chave	Preço
+Essencial (Grátis)	Iniciantes	Link de agendamento + lembretes automáticos	R$ 0
+Profissional (Mais vendido)	Barbeiros fixos	Painel, CRM, controle financeiro e automações	R$ 49/mês
+Premium (Master)	Barbearias	App personalizado + suporte dedicado + remarketing	R$ 149/mês
+
+Gatilho de escassez:
+
+⚠️ Vagas limitadas para o plano Profissional no lançamento — garanta a sua antes do aumento.
+
+Botão CTA em todos os planos:
+
+🚀 Começar agora
+
+🔁 Seção 5 – Prova Social
+
+💬 “Antes eu esquecia até quem tinha marcado. Agora o MeuBarbeiro lembra por mim — meus clientes acham que é milagre.”
+— Lucas, Barbeiro em Belo Horizonte
+
+💬 “Ganhei tempo e passei a parecer muito mais profissional.”
+— Rafa Barber Studio
+
+🔄 Seção 6 – Chamada Final (Fechamento)
+
+Está pronto para parar de perder tempo e começar a lucrar mais?
+
+👉 Crie seu link agora e comece a automatizar sua barbearia em 1 minuto.
+
+🧱 2. Estratégia de Páginas por Plano (Upsell e Downsell)
+🔹 Página do Plano Essencial (Low Ticket)
+
+Copy voltada à facilidade e gratuidade (“Sem cartão, sem complicação”)
+
+Gatilho: “Teste agora, atualize depois”
+
+Upsell direto: botão “Quero automações e controle de caixa” → leva ao Plano Pro
+
+🔹 Página do Plano Pro (Mid Ticket – principal foco de vendas)
+
+Copy voltada à profissionalização
+
+Mostra comparativo visual (Ex: “Antes e depois do MeuBarbeiro Pro”)
+
+Gatilho: “O plano mais usado por barbeiros que vivem lotados”
+
+Upsell: “Quero meu app personalizado” (leva ao Premium)
+
+Downsell: “Ainda não posso investir agora” → retorna ao Essencial (grátis)
+
+🔹 Página do Plano Premium (High Ticket)
+
+Copy voltada à autoridade e status (“Seu nome, seu app, seu estilo”)
+
+Vídeo curto mostrando um app com o nome da barbearia
+
+Gatilho: “Tenha sua própria plataforma de agendamento — como os grandes”
+
+Downsell: “Prefiro começar com o Pro”
+
+🔁 Upsell e Downsell Automáticos
+
+Upsell no checkout: “Adicione lembretes automáticos via WhatsApp por +R$19/mês”
+
+Downsell após abandono de carrinho: “Volte e ative seu plano com 50% de desconto no primeiro mês”
+
+🧠 Resumo Estratégico
+
+Página principal: foco em captura de leads e criação de links (MVP).
+
+Páginas por plano: funil de conversão e reativação.
+
+Copy sempre curta, direta e com CTA visível a cada rolagem.
+
+Tom: profissional + amigável + sem jargão técnico.
