@@ -87,7 +87,7 @@ export default function AdminPage() {
       <header className="border-b">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between max-w-7xl">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-foreground rounded-md flex items-center justify-center">
+            <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center">
               <Scissors className="w-5 h-5 text-background" />
             </div>
             <span className="font-bold text-xl">Meu Barbeiro - Admin</span>
@@ -215,5 +215,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-
