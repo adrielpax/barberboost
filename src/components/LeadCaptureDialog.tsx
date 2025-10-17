@@ -1,5 +1,7 @@
 "use client";
 
+import { useAuth } from "@/context/AuthProvider";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -26,6 +28,7 @@ export default function LeadCaptureDialog({
   onOpenChange,
   selectedPlan,
 }: LeadCaptureDialogProps) {
+  const { preRegister } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
@@ -44,20 +47,97 @@ export default function LeadCaptureDialog({
     { id: "premium", name: "Premium", price: "R$ 149/mês" },
   ];
 
-  const handleSubmit = async () => {
-    try {
-      // Simular salvamento do lead (pode ser substituído por uma API real)
-      console.log("Lead captured:", formData);
+  // const handleSubmit = async () => {
+  //   try {
+  //     // Simular salvamento do lead (pode ser substituído por uma API real)
+  //     console.log("Lead captured:", formData);
 
-      // Mostrar toast de sucesso
+  //     // Mostrar toast de sucesso
+  //     toast({
+  //       title: "Sucesso!",
+  //       description: "Seu cadastro foi realizado com sucesso!",
+  //     });
+
+  //     setStep(3);
+
+  //     // Redirecionar para o dashboard após 2 segundos
+  //     setTimeout(() => {
+  //       onOpenChange(false);
+  //       setStep(1);
+  //       setFormData({
+  //         name: "",
+  //         whatsapp: "",
+  //         email: "",
+  //         password: "",
+  //         barbershopName: "",
+  //         plan: "essencial",
+  //       });
+  //       // /${encodeURIComponent(
+  //       //   formData.barbershopName.toLowerCase().replace(/\s+/g, "-")
+  //       // )}
+  //       router.push(`/dashboard`);
+  //     }, 2000);
+  //   } catch (error) {
+  //     console.error("Error saving lead:", error);
+
+  //     // Mostrar toast de erro
+  //     toast({
+  //       title: "Erro",
+  //       description: "Ocorreu um erro ao salvar seus dados. Tente novamente.",
+  //       variant: "destructive",
+  //     });
+
+  //     // Mesmo com erro, redirecionar (para demonstração)
+  //     setStep(3);
+  //     setTimeout(() => {
+  //       onOpenChange(false);
+  //       setStep(1);
+  //       setFormData({
+  //         name: "",
+  //         whatsapp: "",
+  //         email: "",
+  //         password: "",
+  //         barbershopName: "",
+  //         plan: "essencial",
+  //       });
+  //       router.push(
+  //         `/dashboard/${encodeURIComponent(
+  //           formData.barbershopName.toLowerCase().replace(/\s+/g, "-")
+  //         )}`
+  //       );
+  //     }, 2000);
+  //   }
+  // };
+  const handleSubmit = async () => {
+    if (
+      !formData.name ||
+      !formData.whatsapp ||
+      !formData.password ||
+      !formData.barbershopName
+    )
+      return;
+
+    setStep(2); // mostrar loader ou passo de plano se quiser
+
+    try {
+      // **Chama o preRegister do AuthContext**
+      await preRegister({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        barbershop_name: formData.barbershopName,
+        plan: formData.plan as any,
+      });
+
       toast({
         title: "Sucesso!",
-        description: "Seu cadastro foi realizado com sucesso!",
+        description:
+          "Sua conta foi criada e você será redirecionado ao dashboard!",
       });
 
       setStep(3);
 
-      // Redirecionar para o dashboard após 2 segundos
+      // fecha popup e reseta formulário
       setTimeout(() => {
         onOpenChange(false);
         setStep(1);
@@ -69,41 +149,15 @@ export default function LeadCaptureDialog({
           barbershopName: "",
           plan: "essencial",
         });
-        router.push(
-          `/${encodeURIComponent(
-            formData.barbershopName.toLowerCase().replace(/\s+/g, "-")
-          )}`
-        );
+        router.push("/dashboard"); // redireciona para o dashboard
       }, 2000);
     } catch (error) {
-      console.error("Error saving lead:", error);
-
-      // Mostrar toast de erro
+      console.error("Erro ao registrar lead:", error);
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao salvar seus dados. Tente novamente.",
+        description: "Ocorreu um erro ao criar sua conta. Tente novamente.",
         variant: "destructive",
       });
-
-      // Mesmo com erro, redirecionar (para demonstração)
-      setStep(3);
-      setTimeout(() => {
-        onOpenChange(false);
-        setStep(1);
-        setFormData({
-          name: "",
-          whatsapp: "",
-          email: "",
-          password: "",
-          barbershopName: "",
-          plan: "essencial",
-        });
-        router.push(
-          `/${encodeURIComponent(
-            formData.barbershopName.toLowerCase().replace(/\s+/g, "-")
-          )}`
-        );
-      }, 2000);
     }
   };
 

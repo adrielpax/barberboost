@@ -16,7 +16,7 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                 💈 Seu agendamento no WhatsApp,{" "}
-                <span className="text-primary">sem complicação</span>
+                <span className="text-primary">sem Complicação</span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
                 Crie seu link de agendamento em menos de 1 minuto e nunca mais

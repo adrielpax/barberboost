@@ -1,5 +1,9 @@
 "use client";
 
+import { useAuth } from "@/context/AuthProvider";
+import { useFetchSupabase } from "@/hooks/useFetchSupabase";
+import { useUpdateSupabase } from "@/hooks/useUpdateSupabase";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,23 +28,47 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 export default function DashboardPage() {
+  const { barberData, loading, logout } = useAuth();
   const { toast } = useToast();
   const [barbershopName, setBarbershopName] = useState("");
 
+  const shouldFetch = !!barberData?.id;
+
+  const { data: financialData } = useFetchSupabase({
+    table: "financial",
+    filters: { barber_id: barberData?.id },
+  });
+
+  const { data: entries } = useFetchSupabase({
+    table: "entries",
+    filters: { barber_id: barberData?.id },
+  });
+
   // Supondo que temos o username do barbeiro do usuário logado; para mockar, use "barbearia-do-joao" ou similar
-  const username = "barbearia-do-joao";
-  const barberPageLink = typeof window !== 'undefined' ? `${window.location.origin}/${username}` : `https://meubarbeiro.app/${username}`;
+  function toSlug(text: string) {
+    return text
+      .toLowerCase() // tudo em minúsculas
+      .trim() // remove espaços extras no início/fim
+      .replace(/\s+/g, "-") // substitui espaços por hífen
+      .replace(/[^\w\-]+/g, "") // remove caracteres especiais
+      .replace(/\-\-+/g, "-"); // substitui múltiplos hífens por 1
+  }
+  const username = toSlug(barberData?.barbershop_name || "");
+  const barberPageLink =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/${username}`
+      : `https://meubarbeiro.app/${username}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(barberPageLink);
     toast({
       title: "Link copiado!",
-      description: "Seu link foi copiado para a área de transferência"
+      description: "Seu link foi copiado para a área de transferência",
     });
   };
 
   const openBarberPage = () => {
-    window.open(barberPageLink, '_blank');
+    window.open(barberPageLink, "_blank");
   };
 
   // todo: remove mock functionality
@@ -80,17 +108,19 @@ export default function DashboardPage() {
     },
   ];
 
+  if (loading) return <p>Carregando... </p>;
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between max-w-7xl">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-foreground rounded-md flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center">
               <Scissors className="w-5 h-5 text-background" />
             </div>
             <span className="font-bold text-xl">Meu Barbeiro</span>
           </div>
-          <Button variant="outline" size="sm">
+          <Button onClick={() => logout} variant="outline" size="sm">
             Sair
           </Button>
         </div>
@@ -100,10 +130,14 @@ export default function DashboardPage() {
         <div className="space-y-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">
-              Bem-vindo ao seu painel! 🎉
+              {/* 👋  */}
+              Bem-vindo {barberData?.name?.split(" ")[0]}, ao seu painel! 🎉
             </h1>
             <p className="text-muted-foreground">
-              Complete seu cadastro e comece a receber agendamentos
+              Complete seu cadastro e comece a receber agendamentos,{" "}
+              <button className="text-blue-500 font-medium underline">
+                Clique Aqui
+              </button>
             </p>
           </div>
 
@@ -128,7 +162,8 @@ export default function DashboardPage() {
                     Seu Link Personalizado
                   </CardTitle>
                   <CardDescription>
-                    Compartilhe este link com seus clientes para que eles possam agendar online.
+                    Compartilhe este link com seus clientes para que eles possam
+                    agendar online.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -143,13 +178,19 @@ export default function DashboardPage() {
                       <Copy className="w-4 h-4 mr-2" />
                       Copiar
                     </Button>
-                    <Button variant="outline" onClick={openBarberPage} data-testid="button-open-barber">
+                    <Button
+                      variant="outline"
+                      onClick={openBarberPage}
+                      data-testid="button-open-barber"
+                    >
                       Ver página
                     </Button>
                   </div>
                   <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
                     <p className="text-sm">
-                      💡 <strong>Dica:</strong> Adicione este link na bio do Instagram, no status do WhatsApp ou envie diretamente aos seus clientes!
+                      💡 <strong>Dica:</strong> Adicione este link na bio do
+                      Instagram, no status do WhatsApp ou envie diretamente aos
+                      seus clientes!
                     </p>
                   </div>
                 </CardContent>
@@ -183,7 +224,8 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      R$ {mockFinancialData.today.toFixed(2)}
+                      {/* {mockFinancialData.today.toFixed(2)} */}
+                      R$ {financialData?.today?.toFixed(2) ?? 0}
                     </div>
                   </CardContent>
                 </Card>
@@ -223,7 +265,7 @@ export default function DashboardPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
+                  {/* <div className="space-y-3">
                     {mockEntries.map((entry) => (
                       <div
                         key={entry.id}
@@ -259,7 +301,41 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     ))}
-                  </div>
+                  </div> */}
+                  {entries?.map((entry: any) => (
+                    <div
+                      key={entry.id}
+                      className="flex items-center justify-between p-3 rounded-lg border"
+                    >
+                      <div className="flex items-center gap-3">
+                        {entry.type === "entrada" ? (
+                          <div className="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center">
+                            <TrendingUp className="w-5 h-5 text-green-500" />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 bg-red-500/10 rounded-full flex items-center justify-center">
+                            <TrendingDown className="w-5 h-5 text-red-500" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium">{entry.description}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {entry.date}
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        className={`font-semibold ${
+                          entry.type === "entrada"
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {entry.type === "entrada" ? "+" : "-"}R${" "}
+                        {entry.value.toFixed(2)}
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -352,5 +428,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-

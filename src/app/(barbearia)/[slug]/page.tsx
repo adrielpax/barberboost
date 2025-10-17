@@ -1,5 +1,8 @@
 "use client";
 
+import { useAuth } from "@/context/AuthProvider";
+import { useFetchSupabase } from "@/hooks/useFetchSupabase";
+import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +46,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabaseClient";
 import { Skeleton } from "@/components/ui/skeleton"; // se disponível, senão use div animada
+import Link from "next/link";
 
 type ServiceType = {
   id: string;
@@ -97,11 +101,27 @@ export default function BarbeariaPage() {
   //   null
   // );
   const [barbershopLoading, setBarbershopLoading] = useState(false);
-  const user = { id: "usuario_dono_teste" }; // TROCAR pela auth real
-  const isOwner = true;
+  const { user } = useAuth();
+  const { slug } = useParams();
+
+  const { data: barber, loading } = useFetchSupabase({
+    table: "barbeiros",
+    filters: { slug },
+    single: true,
+  });
+
+  const { data: servicesData } = useFetchSupabase({
+    table: "services",
+    filters: { barber_id: barber?.id },
+  });
+
+  // const user = { id: "usuario_dono_teste" }; // TROCAR pela auth real
+
+  // const isOwner = true;
+  const isOwner = barber?.id === user?.id;
 
   // Render skeleton se loading
-  if (barbershopLoading) {
+  if (loading) {
     return (
       <div className="p-10">
         <Skeleton className="w-1/2 h-8 mb-2 animate-pulse" />
@@ -282,7 +302,34 @@ export default function BarbeariaPage() {
   //     setBarbershopLoading(false);
   //   })();
   // }, []);
+  useEffect(() => {
+    // Corrigido: utilizar canal de eventos e cancelar corretamente no cleanup
+    let channel: any;
 
+    if (barbershopData?.id) {
+      channel = supabase
+        .channel("services-inserts")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "services",
+            filter: `barber_id=eq.${barbershopData.id}`,
+          },
+          (payload: any) => {
+            setServices((prev) => [...prev, payload.new]);
+          }
+        )
+        .subscribe();
+    }
+
+    return () => {
+      if (channel) {
+        channel.unsubscribe();
+      }
+    };
+  }, [barbershopData?.id]);
   return (
     <div className="min-h-screen bg-background">
       {/* Header responsivo */}
@@ -372,6 +419,15 @@ export default function BarbeariaPage() {
           <Button className="flex-1 bg-gradient-to-r from-primary to-primary/80 py-2">
             Agendar Horário
           </Button>
+          ,
+          {isOwner && (
+            <Link
+              href="/dashboard"
+              className="bg-violet-500 text-white px-4 py-2 rounded mt-2 inline-block"
+            >
+              Editar Página
+            </Link>
+          )}
           <div className="flex gap-2">
             <Button variant="outline" size="icon">
               <Phone className="w-5 h-5" />
@@ -419,7 +475,7 @@ export default function BarbeariaPage() {
                 <CardDescription>Selecione o serviço desejado</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {barbershopData.services?.map((service: ServiceType) => (
+                {/* {barbershopData.services?.map((service: ServiceType) => (
                   <div
                     key={service.id}
                     onClick={() => setSelectedService(service.id)}
@@ -442,6 +498,32 @@ export default function BarbeariaPage() {
                       <div className="flex items-center gap-1 text-muted-foreground">
                         <Clock className="w-3 h-3" />
                         {service.duration}
+                      </div>
+                    </div>
+                  </div>
+                ))} */}
+                {servicesData?.map((service: ServiceType) => (
+                  <div
+                    key={service.id}
+                    onClick={() => setSelectedService(service.id)}
+                    className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      selectedService === service.id
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <h3 className="font-semibold text-base mb-1 truncate">
+                      {service.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                      {service.description}
+                    </p>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="font-bold text-green-600">
+                        R$ {service.price}
+                      </span>
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Clock className="w-3 h-3" /> {service.duration}
                       </div>
                     </div>
                   </div>
@@ -497,4 +579,7 @@ export default function BarbeariaPage() {
       </main>
     </div>
   );
+}
+function setServices(arg0: (prev: any) => any[]) {
+  throw new Error("Function not implemented.");
 }
