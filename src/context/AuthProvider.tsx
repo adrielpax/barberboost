@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { LoaderOverlay } from "@/components/ui/LoaderOverlay";
 
-interface BarberData {
+export interface BarberData {
   id: string;
   name: string;
   email: string;
@@ -35,6 +35,12 @@ interface AuthContextType {
     password: string;
     barbershop_name: string;
     plan: "essencial" | "premium";
+  }) => Promise<void>;
+  registerOrLoginLead: (data: {
+    email: string;
+    plan: "essencial" | "premium";
+    barbershop_name: string;
+    name: string;
   }) => Promise<void>;
   refreshBarberData: () => Promise<void>;
 }
@@ -93,6 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password,
       });
       if (error) throw error;
+      if (!data.user) throw new Error("Usuário não encontrado");
       setUser(data.user);
       await fetchBarberData(data.user.id);
       router.push("/dashboard");
@@ -119,18 +126,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }) => {
     setLoading(true);
     try {
-      // Verifica se já existe usuário
-      const { data: existingUser } = await supabase
-        .from("barbeiros")
-        .select("*")
-        .eq("email", data.email)
-        .single();
-      if (existingUser) {
-        router.push("/login");
-        return;
-      }
-
-      // Cria usuário e barbeiro
       const { data: authData, error: signUpError } = await supabase.auth.signUp(
         {
           email: data.email,
@@ -160,7 +155,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setUser(authData.user);
       setBarberData(barber);
-      router.push("/dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Registrar ou logar lead (para landing page)
+  const registerOrLoginLead = async (data: {
+    email: string;
+    plan: "essencial" | "premium";
+    barbershop_name: string;
+    name: string;
+  }) => {
+    setLoading(true);
+    try {
+      // Checa se já existe lead
+      const { data: existingLead } = await supabase
+        .from("leads")
+        .select("*")
+        .eq("email", data.email)
+        .single();
+
+      if (existingLead) {
+        // Loga direto (ou apenas atualiza plano)
+        console.log("Lead existente:", existingLead);
+        return;
+      }
+
+      // Cria novo lead
+      await supabase.from("leads").insert([
+        {
+          email: data.email,
+          plan: data.plan,
+          barbershop_name: data.barbershop_name,
+          name: data.name,
+        },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -178,6 +208,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       login,
       logout,
       preRegister,
+      registerOrLoginLead,
       refreshBarberData,
     }),
     [user, barberData, loading]
@@ -185,7 +216,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      <LoaderOverlay open={false} />
+      <LoaderOverlay open={loading} />
       {!loading && children}
     </AuthContext.Provider>
   );

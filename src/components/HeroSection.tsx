@@ -13,10 +13,10 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
       <div className="container mx-auto px-6 max-w-7xl">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
-            <div className="space-y-4">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                💈 Seu agendamento no WhatsApp,{" "}
-                <span className="text-primary">sem Complicação</span>
+            <div className="flex flex-col text-center justify-center items-center md:text-left space-y-4">
+              <h1 className="text-4xl md:text-4xl lg:text-6xl font-bold leading-tight">
+                Seu agendamento no WhatsApp,{" "}
+                <span className="text-primary">sem Complicação</span>💈
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
                 Crie seu link de agendamento em menos de 1 minuto e nunca mais
@@ -24,14 +24,14 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="self-center sm:flex-row gap-4 ">
               <Button
                 size="lg"
                 onClick={onCtaClick}
-                className="text-lg px-8 py-6"
+                className="w-full md:text-2xl px-8 py-6 animate-bounce"
                 data-testid="button-hero-cta"
               >
-                👉 Criar meu link agora (Grátis!)
+                👉 Criar meu link (Grátis)
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </div>
