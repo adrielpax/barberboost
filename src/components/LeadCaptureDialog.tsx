@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/context/AuthProvider";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -14,8 +13,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabaseClient";
 
 interface LeadCaptureDialogProps {
   open: boolean;
@@ -28,10 +28,13 @@ export default function LeadCaptureDialog({
   onOpenChange,
   selectedPlan,
 }: LeadCaptureDialogProps) {
-  const { preRegister } = useAuth();
+  const { preRegister, login, registerOrLoginLead } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     whatsapp: "",
@@ -47,86 +50,103 @@ export default function LeadCaptureDialog({
     { id: "premium", name: "Premium", price: "R$ 149/mês" },
   ];
 
-  // const handleSubmit = async () => {
-  //   try {
-  //     // Simular salvamento do lead (pode ser substituído por uma API real)
-  //     console.log("Lead captured:", formData);
-
-  //     // Mostrar toast de sucesso
-  //     toast({
-  //       title: "Sucesso!",
-  //       description: "Seu cadastro foi realizado com sucesso!",
-  //     });
-
-  //     setStep(3);
-
-  //     // Redirecionar para o dashboard após 2 segundos
-  //     setTimeout(() => {
-  //       onOpenChange(false);
-  //       setStep(1);
-  //       setFormData({
-  //         name: "",
-  //         whatsapp: "",
-  //         email: "",
-  //         password: "",
-  //         barbershopName: "",
-  //         plan: "essencial",
-  //       });
-  //       // /${encodeURIComponent(
-  //       //   formData.barbershopName.toLowerCase().replace(/\s+/g, "-")
-  //       // )}
-  //       router.push(`/dashboard`);
-  //     }, 2000);
-  //   } catch (error) {
-  //     console.error("Error saving lead:", error);
-
-  //     // Mostrar toast de erro
-  //     toast({
-  //       title: "Erro",
-  //       description: "Ocorreu um erro ao salvar seus dados. Tente novamente.",
-  //       variant: "destructive",
-  //     });
-
-  //     // Mesmo com erro, redirecionar (para demonstração)
-  //     setStep(3);
-  //     setTimeout(() => {
-  //       onOpenChange(false);
-  //       setStep(1);
-  //       setFormData({
-  //         name: "",
-  //         whatsapp: "",
-  //         email: "",
-  //         password: "",
-  //         barbershopName: "",
-  //         plan: "essencial",
-  //       });
-  //       router.push(
-  //         `/dashboard/${encodeURIComponent(
-  //           formData.barbershopName.toLowerCase().replace(/\s+/g, "-")
-  //         )}`
-  //       );
-  //     }, 2000);
-  //   }
-  // };
-  const handleSubmit = async () => {
-    if (
-      !formData.name ||
-      !formData.whatsapp ||
-      !formData.password ||
-      !formData.barbershopName
-    )
-      return;
-
-    setStep(2); // mostrar loader ou passo de plano se quiser
-
+  // 🔎 Verifica se o email já está cadastrado
+  const checkEmailExists = async (email: string) => {
+    if (!email) return null;
+    setLoading(true);
     try {
-      // **Chama o preRegister do AuthContext**
-      await preRegister({
-        name: formData.name,
+      const { data, error } = await supabase
+        .from("users") // ou "leads", depende da sua tabela
+        .select("*")
+        .eq("email", email)
+        .single();
+
+      if (error && error.code !== "PGRST116") throw error;
+      return data || null;
+    } catch (err) {
+      console.error("Erro ao verificar email:", err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailValidation = async () => {
+    const existingUser = await checkEmailExists(formData.email);
+
+    if (existingUser) {
+      // ✅ Se o usuário já existe, faz login automático
+      toast({
+        title: "Bem-vindo de volta! 👋",
+        description: "Fazendo login na sua conta...",
+      });
+
+      setLoading(true);
+      try {
+        await login(existingUser.email, formData.password);
+        setTimeout(() => {
+          onOpenChange(false);
+          router.push("/dashboard");
+        }, 1500);
+      } catch (error) {
+        console.error("Erro no login automático:", error);
+        toast({
+          title: "Erro ao logar",
+          description: "Verifique sua senha ou tente novamente.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+      return true;
+    }
+
+    return false;
+  };
+
+  // Step 1: valida email e vai para Step 2
+  const handleStart = async () => {
+    if (!formData.name || !formData.email || !formData.barbershopName) {
+      toast({
+        title: "Preencha os campos",
+        description: "Nome, email e nome da barbearia são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const alreadyExists = await handleEmailValidation();
+      if (alreadyExists) return; // login automático feito, não avança
+
+      // Não existe → vai para escolher o plano
+      setStep(2);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 2: envia dados finais para criar lead/barbeiro
+  const handleSubmit = async () => {
+    if (!formData.plan) {
+      toast({
+        title: "Escolha um plano",
+        description: "Selecione um plano antes de continuar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await registerOrLoginLead({
         email: formData.email,
-        password: formData.password,
+        plan: formData.plan as "essencial" | "premium",
         barbershop_name: formData.barbershopName,
-        plan: formData.plan as any,
+        name: formData.name,
       });
 
       toast({
@@ -136,30 +156,155 @@ export default function LeadCaptureDialog({
       });
 
       setStep(3);
-
-      // fecha popup e reseta formulário
       setTimeout(() => {
         onOpenChange(false);
-        setStep(1);
-        setFormData({
-          name: "",
-          whatsapp: "",
-          email: "",
-          password: "",
-          barbershopName: "",
-          plan: "essencial",
-        });
-        router.push("/dashboard"); // redireciona para o dashboard
-      }, 2000);
-    } catch (error) {
-      console.error("Erro ao registrar lead:", error);
+        router.push("/dashboard");
+      }, 1500);
+    } catch (err) {
+      console.error(err);
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao criar sua conta. Tente novamente.",
+        description: "Não foi possível criar sua conta. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // const handleSubmit = async () => {
+  //   if (
+  //     !formData.name ||
+  //     !formData.whatsapp ||
+  //     !formData.password ||
+  //     !formData.barbershopName ||
+  //     !formData.plan
+  //   )
+  //     return;
+
+  //   setStep(2); // Mantém o passo de plano visível enquanto processa
+  //   setIsLoading(true); // novo estado de loading
+
+  //   try {
+  //     // 🔍 Verifica se o e-mail já existe
+  //     const { data: existingUser, error: existingError } = await supabase
+  //       .from("leads")
+  //       .select("*")
+  //       .eq("email", formData.email)
+  //       .maybeSingle();
+
+  //     if (existingError && existingError.code !== "PGRST116") {
+  //       throw existingError;
+  //     }
+
+  //     if (existingUser) {
+  //       // ✅ Já existe → login direto
+  //       toast({
+  //         title: "Bem-vindo de volta! 👋",
+  //         description: "Login realizado com sucesso!",
+  //       });
+
+  //       await preRegister(existingUser); // se seu AuthContext usa isso como login
+  //       router.push("/dashboard");
+  //       return;
+  //     }
+
+  //     // 🆕 Não existe → faz o pré-registro normalmente
+  //     await preRegister({
+  //       name: formData.name,
+  //       email: formData.email,
+  //       password: formData.password,
+  //       barbershop_name: formData.barbershopName,
+  //       plan: formData.plan as any,
+  //     });
+
+  //     toast({
+  //       title: "Sucesso!",
+  //       description:
+  //         "Sua conta foi criada e você será redirecionado ao dashboard!",
+  //     });
+
+  //     setStep(3);
+
+  //     setTimeout(() => {
+  //       onOpenChange(false);
+  //       setStep(1);
+  //       setFormData({
+  //         name: "",
+  //         whatsapp: "",
+  //         email: "",
+  //         password: "",
+  //         barbershopName: "",
+  //         plan: "essencial",
+  //       });
+  //       router.push("/dashboard");
+  //     }, 2000);
+  //   } catch (error) {
+  //     console.error("Erro ao registrar lead:", error);
+  //     toast({
+  //       title: "Erro",
+  //       description: "Ocorreu um erro ao criar sua conta. Tente novamente.",
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  // const handleSubmit = async () => {
+  //   if (
+  //     !formData.name ||
+  //     !formData.whatsapp ||
+  //     !formData.password ||
+  //     !formData.barbershopName
+  //   )
+  //     return;
+
+  //   setStep(2);
+
+  //   try {
+  //     const alreadyExists = await handleEmailValidation();
+  //     if (alreadyExists) return;
+
+  //     // 🆕 Registro normal
+  //     await preRegister({
+  //       name: formData.name,
+  //       email: formData.email,
+  //       password: formData.password,
+  //       barbershop_name: formData.barbershopName,
+  //       plan: formData.plan as any,
+  //     });
+
+  //     toast({
+  //       title: "Sucesso!",
+  //       description:
+  //         "Sua conta foi criada e você será redirecionado ao dashboard!",
+  //     });
+
+  //     setStep(3);
+
+  //     setTimeout(() => {
+  //       onOpenChange(false);
+  //       setStep(1);
+  //       setFormData({
+  //         name: "",
+  //         whatsapp: "",
+  //         email: "",
+  //         password: "",
+  //         barbershopName: "",
+  //         plan: "essencial",
+  //       });
+  //       router.push("/dashboard");
+  //     }, 2000);
+  //   } catch (error) {
+  //     console.error("Erro ao registrar lead:", error);
+  //     toast({
+  //       title: "Erro",
+  //       description: "Ocorreu um erro ao criar sua conta. Tente novamente.",
+  //       variant: "destructive",
+  //     });
+  //   }
+  // };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -177,6 +322,21 @@ export default function LeadCaptureDialog({
 
             <div className="space-y-4 py-4">
               <div className="space-y-2">
+                <Label htmlFor="barbershopName">Nome da Barbearia</Label>
+                <Input
+                  id="barbershopName"
+                  placeholder="Ex: Barbearia do João"
+                  value={formData.barbershopName}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      barbershopName: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="name">Nome completo</Label>
                 <Input
                   id="name"
@@ -185,20 +345,20 @@ export default function LeadCaptureDialog({
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  data-testid="input-name"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="barbershopName">Nome da Barbearia</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="barbershopName"
-                  placeholder="Ex: Barbearia do João"
-                  value={formData.barbershopName}
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={formData.email}
                   onChange={(e) =>
-                    setFormData({ ...formData, barbershopName: e.target.value })
+                    setFormData({ ...formData, email: e.target.value })
                   }
-                  data-testid="input-barbershop-name"
+                  onBlur={handleEmailValidation} // 🔥 valida automaticamente ao sair do campo
                 />
               </div>
 
@@ -211,21 +371,6 @@ export default function LeadCaptureDialog({
                   onChange={(e) =>
                     setFormData({ ...formData, whatsapp: e.target.value })
                   }
-                  data-testid="input-whatsapp"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email (opcional)</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  data-testid="input-email"
                 />
               </div>
 
@@ -239,23 +384,26 @@ export default function LeadCaptureDialog({
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  data-testid="input-password"
                 />
               </div>
 
               <Button
                 className="w-full"
                 size="lg"
-                onClick={() => setStep(2)}
+                onClick={handleStart}
                 disabled={
+                  loading ||
                   !formData.name ||
                   !formData.whatsapp ||
                   !formData.password ||
                   !formData.barbershopName
                 }
-                data-testid="button-next-step"
               >
-                Continuar
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Continuar"
+                )}
               </Button>
             </div>
           </>
@@ -277,12 +425,11 @@ export default function LeadCaptureDialog({
                 <div
                   key={plan.id}
                   onClick={() => setFormData({ ...formData, plan: plan.id })}
-                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover-elevate ${
+                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                     formData.plan === plan.id
                       ? "border-primary bg-primary/5"
                       : "border-border"
                   }`}
-                  data-testid={`plan-option-${plan.id}`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -298,13 +445,12 @@ export default function LeadCaptureDialog({
                 </div>
               ))}
 
-              <Button
-                className="w-full"
-                size="lg"
-                onClick={handleSubmit}
-                data-testid="button-submit-lead"
-              >
-                🚀 Criar minha conta
+              <Button className="w-full" size="lg" onClick={handleSubmit}>
+                {isLoading ? (
+                  <span className="loader border-white border-t-transparent rounded-full w-4 h-4 animate-spin"></span>
+                ) : (
+                  "🚀 Criar minha conta"
+                )}
               </Button>
             </div>
           </>
