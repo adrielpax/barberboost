@@ -1,41 +1,32 @@
-"use client";
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "../lib/supabaseClient"; // ajuste o path conforme seu projeto
 
-interface UseUpdateOptions {
-  table: string;
-  idColumn?: string; // coluna do ID (padrão 'id')
-}
+type UpdateStatus = "idle" | "loading" | "success" | "error";
 
-export const useUpdateSupabase = ({
-  table,
-  idColumn = "id",
-}: UseUpdateOptions) => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+export function useUpdateSupabase(table: string) {
+  const [status, setStatus] = useState<UpdateStatus>("idle");
+  const [error, setError] = useState<string | null>(null);
 
   const updateRow = async (
     id: string | number,
-    values: Record<string, any>
+    updates: Record<string, any>
   ) => {
-    setLoading(true);
-    setError(null);
     try {
-      const { data, error } = await supabase
-        .from(table)
-        .update(values)
-        .eq(idColumn, id)
-        .select()
-        .single();
+      setStatus("loading");
+
+      const { error } = await supabase.from(table).update(updates).eq("id", id);
+
       if (error) throw error;
-      return data;
-    } catch (err) {
-      setError(err);
-      return null;
-    } finally {
-      setLoading(false);
+
+      setStatus("success");
+      return true;
+    } catch (err: any) {
+      console.error("Supabase update error:", err.message);
+      setError(err.message);
+      setStatus("error");
+      return false;
     }
   };
 
-  return { updateRow, loading, error };
-};
+  return { updateRow, status, error };
+}

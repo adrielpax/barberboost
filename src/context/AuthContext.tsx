@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const value = useMemo(
     () => ({ user, barberData, loading, login, logout, refreshBarberData }),
-    [user, barberData, loading]
+    [user, barberData, loading, login, logout, refreshBarberData]
   );
 
   return (

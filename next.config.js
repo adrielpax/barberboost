@@ -1,23 +1,13 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "3000",
-        pathname: "/**",
-      },
-    ],
-  },
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "/api/:path*",
-      },
-    ];
-  },
-};
+// next.config.mjs ou next.config.js
+const withPWA = require("next-pwa")({
+  dest: "public",
+  register: true,
+  disable: process.env.NODE_ENV === "development", // 🔥 DESATIVA EM DEV
+  skipWaiting: true,
+});
 
-module.exports = nextConfig;
+module.exports = withPWA({
+  // suas outras configurações
+  reactStrictMode: true,
+});

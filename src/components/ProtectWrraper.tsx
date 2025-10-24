@@ -1,19 +1,24 @@
+// ============================================
+// 3. PROTECTED PAGE WRAPPER
+// ============================================
 "use client";
+
 import { useAuth } from "@/context/AuthProvider";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, ReactNode } from "react";
 
-export const ProtectedPage = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+export function ProtectedPage({ children }: { children: ReactNode }) {
+  const { user, barberData, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/login");
+      router.push("/");
     }
-  }, [loading, user, router]);
+  }, [user, loading, router]);
 
-  if (loading || !user) return null; // ou LoaderOverlay
+  if (loading) return <div>Carregando...</div>;
+  if (!user) return null;
 
   return <>{children}</>;
-};
+}
