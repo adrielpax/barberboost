@@ -1,3 +1,6 @@
+// ============================================
+// 2. AUTH PROVIDER - CORRIGIDO
+// ============================================
 "use client";
 
 import {
@@ -14,13 +17,18 @@ import { LoaderOverlay } from "@/components/ui/LoaderOverlay";
 
 export interface BarberData {
   id: string;
-  name: string;
+  nome: string;
   email: string;
+  whatsapp?: string;
   barbershop_name: string;
-  plan: "essencial" | "premium";
-  public_link: string;
+  plan: "essencial" | "profissional" | "premium";
+  status?: string;
+  bio?: string;
+  address?: string;
+  phone?: string;
+  instagram?: string;
   avatar_url?: string;
-  description?: string;
+  created_at?: string;
 }
 
 interface AuthContextType {
@@ -29,19 +37,6 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  preRegister: (data: {
-    name: string;
-    email: string;
-    password: string;
-    barbershop_name: string;
-    plan: "essencial" | "premium";
-  }) => Promise<void>;
-  registerOrLoginLead: (data: {
-    email: string;
-    plan: "essencial" | "premium";
-    barbershop_name: string;
-    name: string;
-  }) => Promise<void>;
   refreshBarberData: () => Promise<void>;
 }
 
@@ -53,19 +48,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [barberData, setBarberData] = useState<BarberData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Inicializa sessão
+  // Buscar dados do barbeiro usando o ID do auth user
+  const fetchBarberData = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("barbeiros")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (error) {
+        console.error("Erro ao buscar barbeiro:", error);
+        return;
+      }
+
+      setBarberData(data as BarberData);
+    } catch (err) {
+      console.error("Erro em fetchBarberData:", err);
+    }
+  };
+
+  // Inicializar sessão
   useEffect(() => {
     const init = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session?.user) {
-        setUser(data.session.user);
-        await fetchBarberData(data.session.user.id);
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session?.user) {
+          setUser(data.session.user);
+          await fetchBarberData(data.session.user.id);
+        }
+      } catch (err) {
+        console.error("Erro ao inicializar auth:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
+
     init();
 
-    // Escuta mudanças na sessão
+    // Listener para mudanças de autenticação
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (session?.user) {
@@ -81,15 +102,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  const fetchBarberData = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("barbeiros")
-      .select("*")
-      .eq("id", userId)
-      .single();
-    if (!error && data) setBarberData(data);
-  };
-
   // Login
   const login = async (email: string, password: string) => {
     setLoading(true);
@@ -98,11 +110,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password,
       });
+
       if (error) throw error;
       if (!data.user) throw new Error("Usuário não encontrado");
+
       setUser(data.user);
       await fetchBarberData(data.user.id);
       router.push("/dashboard");
+    } catch (err) {
+      console.error("Erro no login:", err);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -110,94 +127,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Logout
   const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setBarberData(null);
-    router.push("/login");
-  };
-
-  // Pré-registro
-  const preRegister = async (data: {
-    name: string;
-    email: string;
-    password: string;
-    barbershop_name: string;
-    plan: "essencial" | "premium";
-  }) => {
-    setLoading(true);
     try {
-      const { data: authData, error: signUpError } = await supabase.auth.signUp(
-        {
-          email: data.email,
-          password: data.password,
-          options: { data: { name: data.name } },
-        }
-      );
-      if (signUpError || !authData.user) throw signUpError;
-
-      const { data: barber, error: insertError } = await supabase
-        .from("barbeiros")
-        .insert([
-          {
-            id: authData.user.id,
-            name: data.name,
-            email: data.email,
-            barbershop_name: data.barbershop_name,
-            plan: data.plan,
-            public_link: `/barbeiro/${data.barbershop_name
-              .toLowerCase()
-              .replace(/\s+/g, "-")}`,
-          },
-        ])
-        .select()
-        .single();
-      if (insertError) throw insertError;
-
-      setUser(authData.user);
-      setBarberData(barber);
-    } finally {
-      setLoading(false);
+      await supabase.auth.signOut();
+      setUser(null);
+      setBarberData(null);
+      router.push("/");
+    } catch (err) {
+      console.error("Erro ao fazer logout:", err);
     }
   };
 
-  // Registrar ou logar lead (para landing page)
-  const registerOrLoginLead = async (data: {
-    email: string;
-    plan: "essencial" | "premium";
-    barbershop_name: string;
-    name: string;
-  }) => {
-    setLoading(true);
-    try {
-      // Checa se já existe lead
-      const { data: existingLead } = await supabase
-        .from("leads")
-        .select("*")
-        .eq("email", data.email)
-        .single();
-
-      if (existingLead) {
-        // Loga direto (ou apenas atualiza plano)
-        console.log("Lead existente:", existingLead);
-        return;
-      }
-
-      // Cria novo lead
-      await supabase.from("leads").insert([
-        {
-          email: data.email,
-          plan: data.plan,
-          barbershop_name: data.barbershop_name,
-          name: data.name,
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Atualizar dados do barbeiro
   const refreshBarberData = async () => {
-    if (user?.id) await fetchBarberData(user.id);
+    if (user?.id) {
+      await fetchBarberData(user.id);
+    }
   };
 
   const value = useMemo(
@@ -207,8 +151,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       loading,
       login,
       logout,
-      preRegister,
-      registerOrLoginLead,
       refreshBarberData,
     }),
     [user, barberData, loading]

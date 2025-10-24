@@ -12,7 +12,8 @@ export default function Header({ onCtaClick }: HeaderProps) {
       <div className="container mx-auto px-6 h-16 flex items-center justify-between max-w-7xl">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 bg-foreground rounded-full flex items-center justify-center">
-            <Scissors className="w-5 h-5 text-background" />
+            {/* <Scissors className="w-5 h-5 text-background" /> */}
+            <img src="/icon-192.png" />
           </div>
           <span className="font-bold text-xl">Meu Barbeiro</span>
         </div>
