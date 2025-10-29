@@ -22,7 +22,9 @@ export default function FinalCtaSection({ onCtaClick }: FinalCtaSectionProps) {
           <Button
             size="default"
             onClick={onCtaClick}
-            className="md:text-lg px-8 py-6 bg-primary hover:bg-primary/90 w-full animate-bounce"
+            className="md:text-lg px-8 py-6 bg-primary hover:bg-primary/90 w-full animate-bounce
+            bg-gradient-to-tr to-cyan-500 via-blue-500 from-blue-900 rounded-full border-blue-500
+            shadow-lg shadow-gray-600"
             data-testid="button-final-cta animate-bounce"
           >
             👉 Criar meu link agora

@@ -1,0 +1,14 @@
+-- Tabela para logs de webhooks
+CREATE TABLE webhook_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) NOT NULL,
+  status VARCHAR(50) NOT NULL, -- success, error, duplicate
+  message TEXT,
+  timestamp TIMESTAMP DEFAULT NOW(),
+  origin VARCHAR(100),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Index para performance
+CREATE INDEX idx_webhook_logs_email ON webhook_logs(email);
+CREATE INDEX idx_webhook_logs_timestamp ON webhook_logs(timestamp);

@@ -93,23 +93,31 @@ export default function LoginPage() {
 
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
         {/* Header */}
-        <div className="mb-12 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
+
+        {/* Card Login */}
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-slate-200">
+          <div className="mb-12 text-center border-b border-gray-200 pb-8">
+            <div className="flex justify-center items-center gap-2 w-full">
+              <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 bg-foreground rounded-full flex items-center justify-center">
+                {/* <Scissors className="w-5 h-5 text-background" /> */}
+                <img src="/icon-192.png" />
+              </div>
+              <span className="font-bold text-xl">Meu Barbeiro</span>
+            </div>
+            {/* <div className="flex items-center justify-center gap-2 mb-4">
             <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center shadow-lg">
               <Scissors className="w-6 h-6 text-white" />
             </div>
             <span className="font-bold text-2xl">Meu Barbeiro</span>
-          </div>
-          <p className="text-slate-600 text-sm">
-            Gerenciador de agendamentos para barbeiros
-          </p>
-        </div>
+          </div> */}
 
-        {/* Card Login */}
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-slate-200">
+            <p className="text-slate-600 text-sm mt-4">
+              Gerenciador de agendamentos para barbeiros
+            </p>
+          </div>
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
-              Bem-vindo
+            <h1 className="text-xl font-bold text-slate-900 mb-2">
+              Bem-vindo, vamos começar.
             </h1>
             <p className="text-slate-600 text-sm">
               Faça login na sua conta para continuar
@@ -127,7 +135,7 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="seu@email.com"
+                  placeholder="..."
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={submitting || authLoading}
@@ -147,7 +155,7 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder="..."
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={submitting || authLoading}
