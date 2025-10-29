@@ -28,11 +28,41 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
               <Button
                 size="lg"
                 onClick={onCtaClick}
-                className="w-full md:text-2xl px-8 py-6 animate-bounce"
+                className="group relative w-full md:text-2xl px-8 py-6 
+    bg-gradient-to-tr to-cyan-300 via-blue-500 from-blue-900
+    shadow-lg shadow-gray-500 rounded-full 
+    transition-all duration-500 ease-out
+    hover:shadow-2xl hover:shadow-cyan-500/50 
+    hover:scale-105 hover:-translate-y-1
+    active:scale-100 active:translate-y-0
+    overflow-hidden border-blue-500"
                 data-testid="button-hero-cta"
               >
-                👉 Criar meu link (Grátis)
-                <ArrowRight className="ml-2 w-5 h-5" />
+                {/* Shimmer effect */}
+                <span
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent 
+    translate-x-[-200%] group-hover:translate-x-[200%] 
+    transition-transform duration-1000 ease-in-out"
+                />
+
+                {/* Gradient overlay on hover */}
+                <span
+                  className="absolute inset-0 bg-gradient-to-tr from-green-900 via-green-500 to-cyan-400 
+    opacity-0 group-hover:opacity-100 
+    transition-opacity duration-500 ease-in-out"
+                />
+
+                {/* Content */}
+                <span className="relative flex items-center justify-center gap-2">
+                  <span className="transition-transform duration-300 group-hover:scale-110">
+                    👉
+                  </span>
+                  <span>Criar meu link (Grátis)</span>
+                  <ArrowRight
+                    className="w-5 h-5 transition-transform duration-300 
+      group-hover:translate-x-2 group-hover:scale-110"
+                  />
+                </span>
               </Button>
             </div>
 

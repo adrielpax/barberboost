@@ -1,0 +1,249 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { CheckCircle2, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { WhatsAppInput } from "@/components/WhatsAppInput";
+import { submitLeadWithWebhook } from "@/lib/services/leadService";
+import { leadSchema } from "@/lib/validators/whatsapp";
+
+interface LeadCaptureDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  selectedPlan?: string;
+}
+
+const plans = [
+  { id: "essencial", name: "Essencial", price: "Grátis" },
+  { id: "profissional", name: "Profissional", price: "R$ 49/mês" },
+  { id: "premium", name: "Premium", price: "R$ 149/mês" },
+];
+
+export default function LeadCaptureDialog({
+  open,
+  onOpenChange,
+  selectedPlan,
+}: LeadCaptureDialogProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  const [formData, setFormData] = useState({
+    nome: "",
+    whatsapp: "",
+    email: "",
+    senha: "",
+    barbershop_name: "",
+    plan: selectedPlan || "essencial",
+  });
+
+  const handleStart = async () => {
+    try {
+      leadSchema
+        .pick({
+          nome: true,
+          email: true,
+          whatsapp: true,
+          senha: true,
+          barbershop_name: true,
+        })
+        .parse(formData);
+
+      setStep(2);
+    } catch (err: any) {
+      toast({
+        title: "Campos inválidos",
+        description: err.errors?.[0]?.message || "Erro de validação",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      leadSchema.parse(formData);
+    } catch (err: any) {
+      toast({
+        title: "Erro de validação",
+        description: err.errors?.[0]?.message || "Dados inválidos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await submitLeadWithWebhook(formData);
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      toast({
+        title: "Sucesso!",
+        description: "Sua conta está sendo criada. Redirecionando...",
+      });
+
+      setStep(3);
+      setTimeout(() => {
+        onOpenChange(false);
+        router.push("/dashboard");
+      }, 2000);
+    } catch (err) {
+      toast({
+        title: "Erro",
+        description: err instanceof Error ? err.message : "Erro ao enviar lead",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md rounded-lg border bg-white">
+        {step === 1 && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Comece sua jornada agora! 🚀</DialogTitle>
+              <DialogDescription>
+                Preencha seus dados para criar sua conta gratuita
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="barbershop_name">Nome da sua Barbearia</Label>
+                <Input
+                  id="barbershop_name"
+                  placeholder="Ex: Barbearia do João"
+                  value={formData.barbershop_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, barbershop_name: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="nome">Seu nome completo</Label>
+                <Input
+                  id="nome"
+                  placeholder="Seu nome"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+
+              <WhatsAppInput
+                value={formData.whatsapp}
+                onChange={(val) => setFormData({ ...formData, whatsapp: val })}
+              />
+
+              <div className="space-y-2">
+                <Label htmlFor="senha">Senha</Label>
+                <Input
+                  id="senha"
+                  type="password"
+                  placeholder="Crie uma senha segura"
+                  value={formData.senha}
+                  onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
+                />
+              </div>
+
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={handleStart}
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Continuar"}
+              </Button>
+            </div>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Escolha seu plano</DialogTitle>
+              <DialogDescription>
+                Você pode mudar depois a qualquer momento
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-3 py-4">
+              {plans.map((plan) => (
+                <div
+                  key={plan.id}
+                  onClick={() => setFormData({ ...formData, plan: plan.id })}
+                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    formData.plan === plan.id
+                      ? "border-primary bg-primary/5"
+                      : "border-border"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold">{plan.name}</p>
+                      <p className="text-sm text-muted-foreground">{plan.price}</p>
+                    </div>
+                    {formData.plan === plan.id && (
+                      <CheckCircle2 className="w-6 h-6 text-primary" />
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "🚀 Criar minha conta"
+                )}
+              </Button>
+            </div>
+          </>
+        )}
+
+        {step === 3 && (
+          <div className="py-8 text-center space-y-4">
+            <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-8 h-8 text-green-500" />
+            </div>
+            <DialogTitle className="text-2xl">Conta criada com sucesso!</DialogTitle>
+            <DialogDescription>Redirecionando para seu painel...</DialogDescription>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

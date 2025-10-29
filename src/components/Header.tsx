@@ -1,12 +1,14 @@
-import { Scissors } from "lucide-react";
+import { Scissors, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   onCtaClick: () => void;
 }
 
 export default function Header({ onCtaClick }: HeaderProps) {
+  const router = useRouter();
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between max-w-7xl">
@@ -25,11 +27,21 @@ export default function Header({ onCtaClick }: HeaderProps) {
             Teste Barbearia
           </Link> */}
           <Button
+            onClick={() => router.push("/login")}
+            size={`sm`}
+            data-testid="button-header-cta"
+            className="bg-black text-white border-gray-100"
+          >
+            <User />
+            <span className="">Entrar</span>
+          </Button>
+          <Button
             onClick={onCtaClick}
             size={`sm`}
             data-testid="button-header-cta"
+            className="hidden md:block"
           >
-            Criar Grátis ✨
+            ✨ Criar
           </Button>
         </div>
       </div>

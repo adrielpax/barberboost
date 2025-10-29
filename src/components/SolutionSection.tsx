@@ -64,8 +64,10 @@ export default function SolutionSection({ onCtaClick }: SolutionSectionProps) {
           <Button
             size="lg"
             onClick={onCtaClick}
-            className="md:text-lg px-8 py-6 w-full animate-bounce"
-            data-testid="button-solution-cta"
+            className="md:text-lg px-8 py-6 w-full animate-bounce rounded-full 
+            bg-gradient-to-tr to-cyan-400 via-blue-500 from-blue-900 shadow-lg shadow-gray-500 border-blue-500
+            md:w-1/3"
+            data-testid="button-solution-cta "
           >
             💬 Criar meu link ( Gratuito )
           </Button>
