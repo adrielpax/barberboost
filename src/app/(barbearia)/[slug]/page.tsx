@@ -85,26 +85,26 @@ export default function BarbeariaPage() {
   });
 
   const barbershopData: BarbershopData = {
-    id: barber?.id || "mockid01",
-    nome: barber?.nome || "Barbearia do João",
+    id: barber?.id || "",
+    nome: barber?.nome || "",
     barbershop_name: barber?.slug || "",
-    whatsapp: barber?.whatsapp || "11999999999",
+    whatsapp: barber?.whatsapp || "",
     avatar_url: "",
     capa_url: "",
-    bio: "Barbearia tradicional com mais de 10 anos de experiência. Cortes modernos e clássicos.",
-    localizacao: "Rua das Flores, 123 - Centro",
+    bio: "",
+    localizacao: "",
     metodos_pagamento: ["Pix", "Cartão", "Dinheiro"],
     horario_abertura: "09:00",
     horario_fechamento: "19:00",
     aberto_manual: false,
     online: true,
     status: "aberto",
-    avaliacao_media: 4.8,
-    total_avaliacoes: 127,
-    total_clientes: 1250,
-    instagram_url: "https://instagram.com/barbeariadojoao",
+    avaliacao_media: 0,
+    total_avaliacoes: 0,
+    total_clientes: 0,
+    instagram_url: "",
     services: servicesData || [],
-    portfolio: ["🔥", "✂️", "💈", "🎨", "⭐", "💯"],
+    portfolio: [],
   };
 
   const isOwner = barber?.id === user?.id;
@@ -210,16 +210,26 @@ export default function BarbeariaPage() {
     <div className="min-h-screen bg-background">
       {/* Header Sticky somente com um token de login vera esse header com botaoes e configuraçoes */}
 
-      {/* <header className="border-b sticky top-0 bg-background/95 backdrop-blur z-50">
-        <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="border-b sticky top-0 bg-background/95 backdrop-blur z-50">
+        <div className="container mx-auto px-6 h-16 flex items-center justify-between max-w-7xl">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 bg-foreground rounded-full flex items-center justify-center">
+              {/* <Scissors className="w-5 h-5 text-background" /> */}
+              <img src="/icon-192.png" />
+            </div>
+            <span className="font-bold text-xl">
+              {barbershopData.barbershop_name.toLowerCase()}
+            </span>
+          </div>
+          <div className="flex items-center gap-4 "></div>
+        </div>
+        {/* <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link
             href="/"
             className="flex items-center gap-2 hover:opacity-70 transition-opacity"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span className="font-bold text-lg hidden sm:inline">
-              Meu Dashboard
-            </span>
+            <span className="font-bold text-lg sm:inline">Meu Dashboard</span>
           </Link>
           {isOwner && (
             <Link
@@ -229,15 +239,15 @@ export default function BarbeariaPage() {
               Editar Página
             </Link>
           )}
-        </div>
-      </header> */}
+        </div> */}
+      </header>
       <main className="w-full max-w-2xl md:px-4 md:py-6 mx-auto">
         {/* Capa */}
         <div className="h-40 bg-gray-200 rounded-xl mb-6 overflow-hidden" />
 
         {/* Info Card */}
         <div className="mb-6 -mt-16 relative z-10 md:px-4">
-          <Card className="border-none shadow-lg">
+          <Card className="border-none shadow-none pt-4">
             <CardContent className="pt-2 md:pt-6 px-2">
               <div className="flex gap-4 items-start mb-4">
                 <Avatar className="w-20 h-20  md:w-24 md:h-24 border-4 border-background flex-shrink-0">
@@ -251,35 +261,63 @@ export default function BarbeariaPage() {
                       variant="secondary"
                       className="text-xs bg-transparent flex items-center gap-1 rounded-md p-0"
                     >
-                      <MdVerified className="w-4 h-4 text-blue-600" />
+                      <MdVerified className="w-5 h-5 text-blue-500" />
                       {/* Verificado */}
                     </Badge>
                     <h1 className="font-bold text-base md:text-2xl truncate">
                       {barbershopData.nome}
                     </h1>
                   </div>
-                  {/* <p className="text-sm text-muted-foreground mb-3">
-                    {barbershopData.barbershop_name}
-                  </p> */}
-                  <div className="flex gap-3 flex-wrap">
-                    {isOpen ? (
-                      <Badge className="bg-green-500/10 text-green-700 border-green-500/20 text-xs">
-                        🟢 Aberto agora
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-red-500/10 text-red-700 border-red-500/20 text-xs">
-                        🔴 Fechado
-                      </Badge>
-                    )}
-                    <span className="text-xs text-muted-foreground">
-                      {barbershopData.horario_abertura} –{" "}
-                      {barbershopData.horario_fechamento}
-                    </span>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="text-left text-xs">
+                      <p className="font-medium text-base">
+                        {barbershopData.services?.length || 0}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Serviços</p>
+                    </div>
+                    <div className="text-left text-xs">
+                      <p className="font-medium text-base flex items-center justify-start">
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        {barbershopData.avaliacao_media}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        ({barbershopData.total_avaliacoes})
+                      </p>
+                    </div>
+                    <div className="text-left text-xs">
+                      <p className="font-medium text-base">
+                        {barbershopData.total_clientes}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Clientes</p>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              <div className="px-4">
+                <div className="flex items-center gap-3 flex-wrap">
+                  {isOpen ? (
+                    <Badge className="bg-green-500/10 text-green-700 border-green-500/20 text-xs">
+                      Aberto agora
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-red-500/10 text-red-700 border-red-500/20 text-xs">
+                      Fechado
+                    </Badge>
+                  )}
+                  <span className="text-xs text-muted-foreground">
+                    {barbershopData.horario_abertura} –{" "}
+                    {barbershopData.horario_fechamento}
+                  </span>
+                </div>
+                {/* <p className="text-sm text-muted-foreground mb-3">
+                  meubarbeiro/{barbershopData.barbershop_name}
+                </p> */}
+              </div>
+
               {/* Bio */}
-              <p className="text-sm text-muted-foreground mb-4 px-6 flex flex-col gap-2">
+              <p className="text-sm text-muted-foreground mb-4 px-4 flex flex-col gap-2">
                 {barbershopData.bio}
                 {/* Localização */}
                 <div
@@ -290,7 +328,16 @@ export default function BarbeariaPage() {
                   <span>{barbershopData.localizacao}</span>
                 </div>
               </p>
-              <div className="px-6 flex flex-row gap-2 pb-3">
+              <div className="px-4 flex flex-row gap-2 pb-3">
+                {/* Action Buttons */}
+                {/* <div className="flex gap-2 mb-6 flex-col sm:flex-row p-6"> */}
+                <Button
+                  size={"default"}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Agendar Horário
+                </Button>
+                {/* </div> */}
                 <Button
                   variant="outline"
                   className="flex-1 sm:flex-none gap-2"
@@ -299,49 +346,18 @@ export default function BarbeariaPage() {
                   }
                 >
                   <MessageCircle className="w-4 h-4" />
-                  WhatsApp
+                  Mensagem
                 </Button>
                 {barbershopData.instagram_url && (
                   <Button
                     variant="outline"
-                    className="flex-1 sm:flex-none gap-2"
+                    size={"icon"}
+                    className=""
                     onClick={() => window.open(barbershopData.instagram_url)}
                   >
                     <Instagram className="w-4 h-4" />
-                    Instagram
                   </Button>
                 )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-2 mb-6 flex-col sm:flex-row p-6">
-                <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
-                  Agendar Horário
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t">
-                <div className="text-center">
-                  <p className="font-bold text-lg">
-                    {barbershopData.services?.length || 0}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Serviços</p>
-                </div>
-                <div className="text-center">
-                  <p className="font-bold text-lg flex items-center justify-center gap-1">
-                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                    {barbershopData.avaliacao_media}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    ({barbershopData.total_avaliacoes})
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="font-bold text-lg">
-                    {barbershopData.total_clientes}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Clientes</p>
-                </div>
               </div>
             </CardContent>
           </Card>
